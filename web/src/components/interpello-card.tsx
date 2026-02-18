@@ -9,15 +9,13 @@ import {
   ExternalLink,
   CalendarDays,
   Link2,
-  MessageSquare,
-  Gavel,
-  User,
   Info,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -28,7 +26,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Tooltip,
   TooltipContent,
@@ -219,53 +216,35 @@ export function InterpelloCard({ interpello }: InterpelloCardProps) {
   );
 }
 
+function formatMassima(text: string): React.ReactNode[] {
+  const paragraphs = text
+    .split(/\n\n+/)
+    .flatMap((p) => p.split(/(?<=\.)\s+(?=[A-Z])/))
+    .filter((p) => p.trim().length > 0);
+
+  if (paragraphs.length <= 1) {
+    return [
+      <p key={0} className="text-[13.5px] leading-[1.9] text-foreground/90">
+        {text}
+      </p>,
+    ];
+  }
+
+  return paragraphs.map((paragraph, i) => (
+    <p
+      key={i}
+      className="text-[13.5px] leading-[1.9] text-foreground/90"
+    >
+      {paragraph.trim()}
+    </p>
+  ));
+}
+
 function InterpelloDetailDialog({
   interpello,
 }: {
   interpello: SourceInterpello;
 }) {
-  const hasSections =
-    interpello.sezioni.quesito ||
-    interpello.sezioni.parere_ade ||
-    interpello.sezioni.soluzione_contribuente;
-
-  const availableTabs: Array<{
-    value: string;
-    label: string;
-    icon: React.ReactNode;
-    content: string | null;
-  }> = [];
-
-  if (interpello.sezioni.quesito) {
-    availableTabs.push({
-      value: "quesito",
-      label: "Quesito",
-      icon: <MessageSquare className="h-3.5 w-3.5" />,
-      content: interpello.sezioni.quesito,
-    });
-  }
-  if (interpello.sezioni.soluzione_contribuente) {
-    availableTabs.push({
-      value: "contribuente",
-      label: "Contribuente",
-      icon: <User className="h-3.5 w-3.5" />,
-      content: interpello.sezioni.soluzione_contribuente,
-    });
-  }
-  if (interpello.sezioni.parere_ade) {
-    availableTabs.push({
-      value: "parere",
-      label: "Parere AdE",
-      icon: <Gavel className="h-3.5 w-3.5" />,
-      content: interpello.sezioni.parere_ade,
-    });
-  }
-
-  const defaultTab =
-    availableTabs.find((t) => t.value === "parere")?.value ??
-    availableTabs[0]?.value ??
-    "parere";
-
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -274,7 +253,7 @@ function InterpelloDetailDialog({
           <ChevronRight className="h-3 w-3" />
         </button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[85vh] p-0 rounded-2xl overflow-hidden">
+      <DialogContent className="max-w-2xl max-h-[85vh] p-0 rounded-2xl overflow-hidden flex flex-col">
         <DialogHeader className="px-6 pt-6 pb-5 bg-gradient-to-b from-[#fef3e6]/50 to-transparent border-b border-border/20">
           <div className="flex items-center gap-2.5 mb-2.5 flex-wrap">
             <span className="inline-flex items-center text-xs font-bold font-mono text-[#ED7203] bg-[#fef3e6] px-3 py-1.5 rounded-lg">
@@ -289,143 +268,87 @@ function InterpelloDetailDialog({
               <CalendarDays className="h-3.5 w-3.5" />
               {formatDate(interpello.data)}
             </span>
-            <InfoTip text="Gli interpelli sono risposte ufficiali dell'Agenzia delle Entrate a quesiti di contribuenti su specifiche fattispecie fiscali." />
           </div>
           <DialogTitle className="text-xl font-bold leading-tight">
             {interpello.oggetto}
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="px-6 pb-6 mt-5" style={{ maxHeight: "58vh" }}>
-          {/* Massima highlighted */}
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-2.5">
-              <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                Massima
-              </h4>
-              <InfoTip text="Principio giuridico estratto dalla risposta: la sintesi ufficiale del parere dell'Agenzia delle Entrate su questo caso." />
-            </div>
-            <div className="bg-gradient-to-br from-[#fef3e6]/60 to-[#fef3e6]/20 border border-[#ED7203]/10 rounded-xl p-5">
-              <p className="text-[13px] leading-[1.8] text-foreground/90">
-                {interpello.massima}
-              </p>
-            </div>
-          </div>
-
-          {/* Sections with tabs */}
-          {hasSections && (
-            <div className="mb-6">
+        <ScrollArea className="flex-1 px-6" style={{ maxHeight: "55vh" }}>
+          <div className="py-5 space-y-6">
+            {/* Massima */}
+            <div>
               <div className="flex items-center gap-2 mb-3">
+                <div className="h-5 w-1 rounded-full bg-[#ED7203]" />
                 <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                  Sezioni del documento
+                  Massima
                 </h4>
-                <InfoTip text="L'interpello si compone di tre parti: il Quesito del contribuente, la Soluzione proposta dal contribuente, e il Parere ufficiale dell'Agenzia delle Entrate." />
               </div>
-              <Tabs defaultValue={defaultTab}>
-                <TabsList
-                  className="w-full h-10 bg-muted/50 rounded-xl p-1"
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: `repeat(${availableTabs.length}, 1fr)`,
-                  }}
-                >
-                  {availableTabs.map((tab) => (
-                    <TabsTrigger
-                      key={tab.value}
-                      value={tab.value}
-                      className="text-xs gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium"
-                    >
-                      {tab.icon}
-                      {tab.label}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-
-                {availableTabs.map((tab) => (
-                  <TabsContent
-                    key={tab.value}
-                    value={tab.value}
-                    className="mt-4"
-                  >
-                    <p className="text-[13px] leading-[1.8] whitespace-pre-wrap text-foreground/90">
-                      {tab.content}
-                    </p>
-                  </TabsContent>
-                ))}
-              </Tabs>
+              <div className="bg-gradient-to-br from-[#fef3e6]/60 to-[#fef3e6]/20 border border-[#ED7203]/10 rounded-xl p-6 space-y-3">
+                {formatMassima(interpello.massima)}
+              </div>
             </div>
-          )}
 
-          {/* Temi */}
-          {interpello.temi.length > 0 && (
-            <div className="mb-5">
-              <div className="flex items-center gap-2 mb-2.5">
-                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+            {/* Temi */}
+            {interpello.temi.length > 0 && (
+              <div>
+                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2.5">
                   Temi
                 </h4>
-                <InfoTip text="Aree tematiche fiscali trattate in questo interpello." />
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {interpello.temi.map((tema) => (
-                  <span
-                    key={tema}
-                    className="text-xs font-medium text-[#ED7203]/80 bg-[#fef3e6]/70 px-2.5 py-1 rounded-full"
-                  >
-                    {tema.replace(/_/g, " ")}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Articoli TU IVA collegati */}
-          {interpello.articoli_tu_iva_collegati.length > 0 && (
-            <div className="mb-5">
-              <div className="flex items-center gap-2 mb-2.5">
-                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                  Articoli TU IVA collegati
-                </h4>
-                <InfoTip text="Articoli del Testo Unico IVA (D.Lgs. 10/2026) direttamente rilevanti per il caso trattato in questo interpello." />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {interpello.articoli_tu_iva_collegati.map((id) => (
-                  <Badge
-                    key={id}
-                    variant="secondary"
-                    className="font-mono text-xs bg-[#e8f1fa] text-[#004489] hover:bg-[#d0e3f5] px-2.5 py-1"
-                  >
-                    Art. {id.replace("art_", "")}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Footer: PDF + citazione */}
-          <div className="mt-8 pt-5 border-t border-border/30 space-y-3">
-            {interpello.link_pdf && (
-              <div className="flex items-center gap-2">
-                <a
-                  href={interpello.link_pdf}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-sm font-medium text-[#004489] hover:text-[#4B92DB] transition-colors"
-                >
-                  <FileText className="h-4 w-4" />
-                  Scarica PDF originale
-                  <ExternalLink className="h-3.5 w-3.5" />
-                </a>
-                <InfoTip text="Documento PDF originale pubblicato dall'Agenzia delle Entrate." />
+                <div className="flex flex-wrap gap-1.5">
+                  {interpello.temi.map((tema) => (
+                    <span
+                      key={tema}
+                      className="text-xs font-medium text-[#ED7203]/80 bg-[#fef3e6]/70 px-2.5 py-1 rounded-full"
+                    >
+                      {tema.replace(/_/g, " ")}
+                    </span>
+                  ))}
+                </div>
               </div>
             )}
-            <div className="flex items-center gap-2">
-              <p className="text-xs text-muted-foreground/70 italic leading-relaxed">
-                {interpello.citazione}
-              </p>
-              <InfoTip text="Riferimento bibliografico ufficiale per citare questo interpello." />
-            </div>
+
+            {/* Articoli TU IVA collegati */}
+            {interpello.articoli_tu_iva_collegati.length > 0 && (
+              <div>
+                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2.5">
+                  Articoli TU IVA collegati
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {interpello.articoli_tu_iva_collegati.map((id) => (
+                    <Badge
+                      key={id}
+                      variant="secondary"
+                      className="font-mono text-xs bg-[#e8f1fa] text-[#004489] hover:bg-[#d0e3f5] px-2.5 py-1"
+                    >
+                      Art. {id.replace("art_", "")}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Citazione */}
+            <p className="text-xs text-muted-foreground/60 italic leading-relaxed">
+              {interpello.citazione}
+            </p>
           </div>
         </ScrollArea>
+
+        {interpello.link_pdf && (
+          <DialogFooter className="px-6 py-4 border-t border-border/30 bg-muted/30 sm:justify-start">
+            <a
+              href={interpello.link_pdf}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2.5 bg-[#004489] hover:bg-[#003366] text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm"
+            >
+              <FileText className="h-4 w-4" />
+              Apri PDF originale
+              <ExternalLink className="h-3.5 w-3.5 opacity-70" />
+            </a>
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );

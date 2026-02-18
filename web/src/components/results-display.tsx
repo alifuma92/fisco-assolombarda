@@ -10,6 +10,7 @@ import {
   Zap,
   Search,
   FileText,
+  Tag,
 } from "lucide-react";
 import type { SourceMetadata } from "@/lib/types";
 
@@ -20,22 +21,25 @@ interface ResultsDisplayProps {
 
 const TYPE_CONFIG: Record<
   string,
-  { label: string; icon: React.ReactNode; color: string }
+  { label: string; icon: React.ReactNode; color: string; bg: string }
 > = {
   normativa: {
     label: "Ricerca normativa",
-    icon: <FileText className="h-3 w-3" />,
+    icon: <FileText className="h-4 w-4" />,
     color: "text-[#004489]",
+    bg: "bg-[#e8f1fa]",
   },
   specifica: {
     label: "Domanda specifica",
-    icon: <Search className="h-3 w-3" />,
+    icon: <Search className="h-4 w-4" />,
     color: "text-[#ED7203]",
+    bg: "bg-[#fef3e6]",
   },
   generica: {
     label: "Ricerca generica",
-    icon: <Zap className="h-3 w-3" />,
+    icon: <Zap className="h-4 w-4" />,
     color: "text-[#4B92DB]",
+    bg: "bg-[#e8f1fa]",
   },
 };
 
@@ -51,44 +55,87 @@ export function ResultsDisplay({
 
   return (
     <div className="mt-6">
-      {/* Analysis summary pill */}
+      {/* Analysis summary card */}
       {metadata && (
-        <div className="mb-6 flex items-center gap-2 flex-wrap">
-          {/* Type pill */}
-          <span
-            className={`inline-flex items-center gap-1.5 text-xs font-semibold bg-white border border-border/40 shadow-[0_1px_2px_rgba(0,0,0,0.04)] rounded-full px-3 py-1.5 ${typeConf.color}`}
-          >
-            {typeConf.icon}
-            {typeConf.label}
-          </span>
-
-          {/* Count pills */}
-          {totalArticles > 0 && (
-            <span className="inline-flex items-center gap-1 text-xs font-medium text-[#004489] bg-[#e8f1fa] rounded-full px-2.5 py-1.5">
-              <BookOpen className="h-3 w-3" />
-              {totalArticles} articol{totalArticles === 1 ? "o" : "i"}
-            </span>
-          )}
-          {totalInterpelli > 0 && (
-            <span className="inline-flex items-center gap-1 text-xs font-medium text-[#ED7203] bg-[#fef3e6] rounded-full px-2.5 py-1.5">
-              <Gavel className="h-3 w-3" />
-              {totalInterpelli} interpell{totalInterpelli === 1 ? "o" : "i"}
-            </span>
-          )}
-
-          {/* Temi pills */}
-          {temi.slice(0, 3).map((tema) => (
-            <span
-              key={tema}
-              className="text-xs font-medium text-muted-foreground bg-muted/80 rounded-full px-2.5 py-1.5"
+        <div className="mb-6 bg-white rounded-2xl border border-border/30 shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden">
+          {/* Main row: type + stats + timing */}
+          <div className="px-5 py-4 flex items-center gap-5 flex-wrap">
+            {/* Query type badge */}
+            <div
+              className={`inline-flex items-center gap-2 text-sm font-bold ${typeConf.color} ${typeConf.bg} px-4 py-2 rounded-xl`}
             >
-              {tema.replace(/_/g, " ")}
-            </span>
-          ))}
-          {temi.length > 3 && (
-            <span className="text-xs text-muted-foreground/50 py-1.5">
-              +{temi.length - 3}
-            </span>
+              {typeConf.icon}
+              {typeConf.label}
+            </div>
+
+            {/* Vertical divider */}
+            {(totalArticles > 0 || totalInterpelli > 0) && (
+              <div className="h-8 w-px bg-border/40 hidden sm:block" />
+            )}
+
+            {/* Stats */}
+            <div className="flex items-center gap-5">
+              {totalArticles > 0 && (
+                <div className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-lg bg-[#e8f1fa] flex items-center justify-center">
+                    <BookOpen className="h-3.5 w-3.5 text-[#004489]" />
+                  </div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-base font-bold text-[#004489] tabular-nums">
+                      {totalArticles}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      articol{totalArticles === 1 ? "o" : "i"}
+                    </span>
+                  </div>
+                </div>
+              )}
+              {totalInterpelli > 0 && (
+                <div className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-lg bg-[#fef3e6] flex items-center justify-center">
+                    <Gavel className="h-3.5 w-3.5 text-[#ED7203]" />
+                  </div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-base font-bold text-[#ED7203] tabular-nums">
+                      {totalInterpelli}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      interpell{totalInterpelli === 1 ? "o" : "i"}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Timing - pushed right */}
+            {metadata.timing && (
+              <div className="ml-auto hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground/50">
+                <Clock className="h-3 w-3" />
+                <span className="tabular-nums">
+                  {metadata.timing.analysis_ms + metadata.timing.retrieval_ms}ms
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Temi strip */}
+          {temi.length > 0 && (
+            <div className="px-5 py-2.5 bg-muted/30 border-t border-border/20 flex items-center gap-2 flex-wrap">
+              <Tag className="h-3 w-3 text-muted-foreground/40 shrink-0" />
+              {temi.slice(0, 5).map((tema) => (
+                <span
+                  key={tema}
+                  className="text-xs font-medium text-muted-foreground bg-white border border-border/30 rounded-full px-2.5 py-0.5 shadow-[0_0.5px_1px_rgba(0,0,0,0.03)]"
+                >
+                  {tema.replace(/_/g, " ")}
+                </span>
+              ))}
+              {temi.length > 5 && (
+                <span className="text-xs text-muted-foreground/40">
+                  +{temi.length - 5}
+                </span>
+              )}
+            </div>
           )}
         </div>
       )}
@@ -100,17 +147,6 @@ export function ResultsDisplay({
           <div className="bg-white rounded-2xl border border-border/30 shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-6 lg:p-8">
             <StreamingText text={streamingText} />
           </div>
-
-          {/* Timing info */}
-          {metadata?.timing && streamingText && (
-            <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground/50 px-2">
-              <Clock className="h-3 w-3" />
-              <span>
-                Analisi {metadata.timing.analysis_ms}ms &middot; Retrieval{" "}
-                {metadata.timing.retrieval_ms}ms
-              </span>
-            </div>
-          )}
         </div>
 
         {/* Right: sources sidebar */}

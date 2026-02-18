@@ -111,8 +111,8 @@ function FormattedArticleText({ text }: { text: string }) {
             <span className="text-xs font-mono font-bold text-[#004489] bg-[#e8f1fa] rounded-lg px-2.5 py-1.5 shrink-0 mt-0.5">
               c.{block.number}
             </span>
-            <p className="text-[13px] leading-[1.8] text-foreground/90 whitespace-pre-wrap flex-1">
-              {block.content}
+            <p className="text-[13px] leading-[1.8] text-foreground/90 flex-1">
+              {block.content.replace(/\n/g, " ")}
             </p>
           </div>
         );

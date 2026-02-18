@@ -151,3 +151,237 @@ body {
   background-size: 200% 100%;
   animation: shimmer 2s ease-in-out infinite;
 }
+
+/* ============================================
+   Streaming prose — response body typography
+   ============================================ */
+
+.streaming-prose {
+  --prose-body: #374151;
+  --prose-heading: var(--foreground);
+  --prose-muted: var(--muted-foreground);
+  --prose-accent: #004489;
+  --prose-accent-soft: #4B92DB;
+  --prose-accent-bg: #e8f1fa;
+
+  font-size: 0.875rem;
+  line-height: 1.9;
+  color: var(--prose-body);
+}
+
+/* — Section headings (h2) — */
+
+.streaming-prose h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--prose-heading);
+  margin-top: 2.5rem;
+  margin-bottom: 1.125rem;
+  padding-bottom: 0.875rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.streaming-prose h2:first-child {
+  margin-top: 0;
+}
+
+.streaming-prose h2 .section-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.75rem;
+  width: 1.75rem;
+  border-radius: 0.5rem;
+  background: var(--prose-accent-bg);
+  color: var(--prose-accent);
+  flex-shrink: 0;
+}
+
+/* — Sub-headings (h3) — */
+
+.streaming-prose h3 {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--prose-heading);
+  letter-spacing: -0.01em;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.streaming-prose h2 + h3 {
+  margin-top: 0.75rem;
+}
+
+/* — Paragraphs — */
+
+.streaming-prose p {
+  margin-bottom: 0.875rem;
+}
+
+.streaming-prose p:last-child {
+  margin-bottom: 0;
+}
+
+/* — Inline styles — */
+
+.streaming-prose strong {
+  font-weight: 700;
+  color: var(--prose-heading);
+}
+
+.streaming-prose em {
+  color: var(--prose-muted);
+}
+
+/* — Unordered lists — */
+
+.streaming-prose ul {
+  margin-top: 0.75rem;
+  margin-bottom: 1rem;
+  padding-left: 0;
+  list-style: none;
+}
+
+.streaming-prose ul > li {
+  position: relative;
+  padding-left: 1.375rem;
+  margin-bottom: 0.5rem;
+}
+
+.streaming-prose ul > li:last-child {
+  margin-bottom: 0;
+}
+
+.streaming-prose ul > li::before {
+  content: "";
+  position: absolute;
+  left: 0.25rem;
+  top: 0.625em;
+  height: 0.375rem;
+  width: 0.375rem;
+  border-radius: 9999px;
+  background: var(--prose-accent-soft);
+}
+
+/* — Ordered lists — */
+
+.streaming-prose ol {
+  margin-top: 0.75rem;
+  margin-bottom: 1rem;
+  padding-left: 0;
+  list-style: none;
+  counter-reset: prose-ol;
+}
+
+.streaming-prose ol > li {
+  position: relative;
+  counter-increment: prose-ol;
+  padding-left: 1.625rem;
+  margin-bottom: 0.625rem;
+}
+
+.streaming-prose ol > li:last-child {
+  margin-bottom: 0;
+}
+
+.streaming-prose ol > li::before {
+  content: counter(prose-ol) ".";
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  color: var(--prose-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+/* — Nested lists — */
+
+.streaming-prose li > ul,
+.streaming-prose li > ol {
+  margin-top: 0.375rem;
+  margin-bottom: 0.25rem;
+}
+
+.streaming-prose li > ul > li::before {
+  background: #94a3b8;
+  height: 0.3125rem;
+  width: 0.3125rem;
+  top: 0.7em;
+}
+
+.streaming-prose li > p {
+  margin-bottom: 0.25rem;
+}
+
+.streaming-prose li > p:last-child {
+  margin-bottom: 0;
+}
+
+/* — Links — */
+
+.streaming-prose a {
+  color: var(--prose-accent);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: rgba(0, 68, 137, 0.25);
+  text-underline-offset: 2px;
+  transition: text-decoration-color 0.15s ease;
+}
+
+.streaming-prose a:hover {
+  text-decoration-color: rgba(0, 68, 137, 0.6);
+}
+
+/* — Inline code — */
+
+.streaming-prose code {
+  color: var(--prose-accent);
+  background: var(--prose-accent-bg);
+  padding: 0.1rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-family: var(--font-mono), monospace;
+}
+
+.streaming-prose pre {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+
+.streaming-prose pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.8125rem;
+}
+
+/* — Blockquote — */
+
+.streaming-prose blockquote {
+  margin: 1rem 0;
+  border-left: 3px solid var(--prose-accent-soft);
+  background: rgba(232, 241, 250, 0.25);
+  border-radius: 0 0.5rem 0.5rem 0;
+  padding: 0.75rem 1rem;
+}
+
+.streaming-prose blockquote > p {
+  margin-bottom: 0;
+}
+
+/* — Horizontal rule — */
+
+.streaming-prose hr {
+  margin: 2rem 0;
+  border: none;
+  border-top: 1px solid var(--border);
+}
