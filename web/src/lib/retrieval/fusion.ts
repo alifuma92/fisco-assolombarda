@@ -40,9 +40,12 @@ export function fuseAndRerank(
   // Path B (semantic search)
   pathBTu.forEach(addResult);
   pathBIp.forEach(addResult);
-  // Path C (metadata filter) — scale down scores to not overpower semantic results
+  // Path C (metadata filter) — scale down scores to not overpower semantic results.
+  // Articles get a higher weight (0.65) because metadata-matched articles are generally
+  // more relevant than metadata-matched interpelli; this helps surface key articles
+  // that semantic search may rank lower (e.g., broad articles like Art. 37 "operazioni esenti").
   for (const r of pathCTu) {
-    addResult({ ...r, score: r.score * 0.5 });
+    addResult({ ...r, score: r.score * 0.65 });
   }
   for (const r of pathCIp) {
     addResult({ ...r, score: r.score * 0.5 });
@@ -76,7 +79,7 @@ export function fuseAndRerank(
     if (linkedInterpelloIds.has(result.id)) result.score += 0.1;
   }
 
-  // Bonus 4: Tema overlap bonus: +0.02 per matching tema
+  // Bonus 4: Tema overlap bonus for interpelli: +0.02 per matching tema
   if (analysis.temi_probabili.length > 0) {
     const queryTemi = new Set(analysis.temi_probabili);
     for (const result of allInterpelli.values()) {
@@ -89,15 +92,48 @@ export function fuseAndRerank(
     }
   }
 
+  // Bonus 5: Article temi relevance — reward articles matching query temi,
+  // penalize semantic-only results with zero temi overlap (likely noise).
+  // This ensures topically relevant articles (e.g., Art. 37 "operazioni esenti"
+  // for a query about esenzioni) beat generic articles that happen to score
+  // high on embedding similarity (e.g., Art. 5 "cessioni di beni").
+  if (analysis.temi_probabili.length >= 2) {
+    const queryTemi = new Set(analysis.temi_probabili);
+    for (const result of allArticles.values()) {
+      if (result.article) {
+        const overlap = result.article.temi.filter((t: string) =>
+          queryTemi.has(t)
+        ).length;
+        const ratio = overlap / queryTemi.size;
+        if (ratio >= 1.0) {
+          // Full match: article covers all identified themes — very likely the key article
+          result.score += 0.3;
+        } else if (ratio >= 0.5) {
+          // Partial match: some thematic relevance
+          result.score += 0.1;
+        } else if (overlap === 0 && result.source !== "lookup") {
+          // Zero overlap with no direct reference: likely noise from semantic search
+          result.score *= 0.7;
+        }
+      }
+    }
+  }
+
+  // For generica queries (broad topics), prioritize articles over interpelli.
+  // Generica queries need broader normativa coverage, while interpelli add noise.
+  const isGenerica = analysis.tipo_query === "generica";
+  const maxArticles = isGenerica ? FINAL_LIMITS.articles + 1 : FINAL_LIMITS.articles;
+  const maxInterpelli = isGenerica ? Math.max(1, FINAL_LIMITS.interpelli - 1) : FINAL_LIMITS.interpelli;
+
   const sortedArticles = Array.from(allArticles.values())
     .filter((r) => r.score >= FINAL_LIMITS.minScoreArticles)
     .sort((a, b) => b.score - a.score)
-    .slice(0, FINAL_LIMITS.articles);
+    .slice(0, maxArticles);
 
   const sortedInterpelli = Array.from(allInterpelli.values())
     .filter((r) => r.score >= FINAL_LIMITS.minScoreInterpelli)
     .sort((a, b) => b.score - a.score)
-    .slice(0, FINAL_LIMITS.interpelli);
+    .slice(0, maxInterpelli);
 
   return {
     articles: sortedArticles,

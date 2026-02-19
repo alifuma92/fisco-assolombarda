@@ -1,117 +1,226 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import { SearchInput } from "@/components/search-input";
 import { ResultsDisplay } from "@/components/results-display";
 import { ExampleQueries } from "@/components/example-queries";
 import { LoadingSkeleton } from "@/components/loading-skeleton";
 import { useQuery } from "@/hooks/use-query";
-import { RotateCcw, BookOpen, Gavel } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { BookOpen, Gavel, Sparkles, Zap, HelpCircle } from "lucide-react";
+import Link from "next/link";
+
+const QUERY_TYPE_CONFIG: Record<
+  string,
+  { label: string; style: string; tooltip: string }
+> = {
+  normativa: {
+    label: "Domanda normativa",
+    style: "bg-[#e8f1fa] text-[#004489]/60",
+    tooltip: "Il sistema ha identificato riferimenti normativi espliciti. La ricerca privilegia il lookup diretto.",
+  },
+  specifica: {
+    label: "Domanda specifica",
+    style: "bg-[#fef3e6] text-[#ED7203]/70",
+    tooltip: "Domanda su un caso specifico. La risposta combina normativa e prassi interpretativa.",
+  },
+  generica: {
+    label: "Domanda generica",
+    style: "bg-[#e8f1fa]/60 text-[#4B92DB]/60",
+    tooltip: "Ricerca ampia su tematiche IVA. Il sistema ha cercato articoli e interpelli correlati.",
+  },
+};
 
 export default function HomePage() {
-  const { submit, isLoading, streamingText, metadata, error, reset } =
+  const { submit, isLoading, streamingText, metadata, error, reset, streamingDone } =
     useQuery();
 
-  const hasResults = streamingText || metadata;
+  const [currentQuery, setCurrentQuery] = useState("");
 
-  return (
-    <main className="min-h-screen bg-background">
-      {/* Header with gradient */}
-      <header className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#004489] via-[#003366] to-[#004489]" />
-        <div className="absolute inset-0 bg-pattern" />
-        <div className="relative px-4 py-5">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              {/* Logo mark */}
-              <div className="flex items-center justify-center h-11 w-11 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="text-white"
-                >
-                  <path
-                    d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+  const hasResults = streamingText || metadata;
+  const showResultsLayout =
+    hasResults || isLoading || (error != null && currentQuery !== "");
+
+  const handleSubmit = useCallback(
+    (query: string) => {
+      setCurrentQuery(query);
+      submit(query);
+    },
+    [submit]
+  );
+
+  const handleReset = useCallback(() => {
+    setCurrentQuery("");
+    reset();
+  }, [reset]);
+
+  /* ─── Hero / landing state ─── */
+  if (!showResultsLayout) {
+    return (
+      <main className="min-h-screen relative flex flex-col">
+        <div className="gradient-mesh">
+          <div className="gradient-mesh-inner" />
+        </div>
+
+        <div className="flex-1 flex flex-col justify-center px-4 py-12">
+          <div className="w-full max-w-3xl mx-auto">
+            {/* ── Branding ── */}
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center gap-2 text-xs font-semibold text-[#004489]/50 bg-[#e8f1fa]/60 px-3.5 py-1.5 rounded-full mb-6 tracking-wide uppercase">
+                <Sparkles className="h-3 w-3" />
+                Assistente AI per il fisco italiano
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-white tracking-tight leading-tight">
-                  RAG Fiscale
-                </h1>
-                <p className="text-xs text-white/60 leading-tight font-medium tracking-wide">
-                  TESTO UNICO IVA &middot; INTERPELLI AdE 2024-2025
-                </p>
-              </div>
+              <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-gradient mb-4 leading-[1.1]">
+                Fisco AI
+              </h1>
+              <p className="text-lg sm:text-xl text-muted-foreground font-medium max-w-2xl mx-auto leading-relaxed whitespace-nowrap">
+                Interroga il <strong className="text-foreground">Testo Unico IVA</strong> e gli <strong className="text-foreground">Interpelli dell&apos;Agenzia delle Entrate</strong>
+              </p>
             </div>
-            <div className="hidden sm:flex items-center gap-6 text-xs">
-              <span className="flex items-center gap-1.5 text-white/70">
-                <BookOpen className="h-3.5 w-3.5" />
-                <span className="font-semibold text-white">171</span> articoli
-              </span>
-              <span className="flex items-center gap-1.5 text-white/70">
-                <Gavel className="h-3.5 w-3.5" />
-                <span className="font-semibold text-white">544</span>{" "}
-                interpelli
-              </span>
+
+            {/* ── Search CTA ── */}
+            <div className="mb-6">
+              <SearchInput onSubmit={handleSubmit} isLoading={isLoading} />
+            </div>
+
+            {/* ── Example queries ── */}
+            <ExampleQueries onSelect={handleSubmit} />
+
+            {/* ── Stats strip ── */}
+            <div className="flex items-center justify-center gap-6 mt-10">
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-3.5 w-3.5 text-[#004489]/40" />
+                <span className="text-xs text-muted-foreground/50">
+                  <span className="font-bold text-foreground/40 tabular-nums">171</span> articoli TU IVA
+                </span>
+              </div>
+              <div className="h-3 w-px bg-border/30" />
+              <div className="flex items-center gap-2">
+                <Gavel className="h-3.5 w-3.5 text-[#ED7203]/40" />
+                <span className="text-xs text-muted-foreground/50">
+                  <span className="font-bold text-foreground/40 tabular-nums">544</span> interpelli AdE
+                </span>
+              </div>
+              <div className="h-3 w-px bg-border/30" />
+              <div className="flex items-center gap-2">
+                <Zap className="h-3.5 w-3.5 text-[#4B92DB]/40" />
+                <span className="text-xs text-muted-foreground/50">Ricerca semantica</span>
+              </div>
             </div>
           </div>
         </div>
-      </header>
 
-      {/* Content area */}
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Search bar - elevated above content */}
-        <div className="-mt-0 pt-6 pb-2">
-          <div className="flex items-center gap-2">
-            <div className="flex-1">
-              <SearchInput onSubmit={submit} isLoading={isLoading} />
+        {/* ── Footer ── */}
+        <footer className="pb-6 text-center space-y-2">
+          <Link
+            href="/come-funziona"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground/50 hover:text-[#004489] transition-colors"
+          >
+            <HelpCircle className="h-3 w-3" />
+            Come funziona
+          </Link>
+          <p className="text-sm text-muted-foreground/50">
+            powered by{" "}
+            <a
+              href="https://dglen.it"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-foreground/40 hover:text-[#004489] transition-colors"
+            >
+              dglen srl
+            </a>
+          </p>
+        </footer>
+      </main>
+    );
+  }
+
+  /* ─── Results state ─── */
+  return (
+    <main className="min-h-screen relative">
+      <div className="gradient-mesh">
+        <div className="gradient-mesh-inner" />
+      </div>
+
+      {/* Sticky query header */}
+      <div className="sticky top-0 z-30 query-header-frost">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3">
+          {/* Row 1: label + badge (left) — action (right) */}
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest">
+                Hai chiesto
+              </span>
+              {metadata && (() => {
+                const qt = metadata.queryAnalysis?.tipo_query ?? "generica";
+                const conf = QUERY_TYPE_CONFIG[qt] ?? QUERY_TYPE_CONFIG.generica;
+                return (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full cursor-default ${conf.style}`}>
+                        {conf.label}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="max-w-[260px] text-xs leading-relaxed">
+                      <p>{conf.tooltip}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })()}
             </div>
-            {hasResults && !isLoading && (
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={reset}
-                className="h-[52px] w-[52px] shrink-0 rounded-xl bg-white shadow-sm border-border/60 hover:bg-accent"
-                title="Nuova ricerca"
+            {!isLoading && (
+              <button
+                onClick={handleReset}
+                className="text-[13px] font-semibold text-[#004489] hover:text-[#003366] transition-colors"
               >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
+                Nuova ricerca
+              </button>
             )}
           </div>
+          {/* Row 2: query text, full width */}
+          <p className="text-sm sm:text-[15px] font-semibold text-foreground leading-snug truncate">
+            {currentQuery}
+          </p>
         </div>
+      </div>
 
-        {/* Example queries - centered, inviting */}
-        {!hasResults && !isLoading && !error && (
-          <ExampleQueries onSelect={submit} />
-        )}
-
-        {/* Loading state */}
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 pt-8">
+        {/* Content */}
         {isLoading && !streamingText && <LoadingSkeleton />}
-
-        {/* Results */}
         {hasResults && (
-          <ResultsDisplay streamingText={streamingText} metadata={metadata} />
+          <ResultsDisplay streamingText={streamingText} metadata={metadata} streamingDone={streamingDone} />
         )}
-
-        {/* Error */}
         {error && (
-          <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 flex items-center gap-2">
+          <div className="mt-6 p-4 glass rounded-xl border border-red-200/50 text-sm text-red-700 flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-red-500 shrink-0" />
             {error}
           </div>
         )}
       </div>
 
-      {/* Footer */}
-      <footer className="mt-16 pb-6 text-center text-xs text-muted-foreground/50">
-        D.Lgs. 19 gennaio 2026, n. 10 &middot; Powered by RAG
+      <footer className="mt-16 pb-6 text-center space-y-2">
+        <Link
+          href="/come-funziona"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground/50 hover:text-[#004489] transition-colors"
+        >
+          <HelpCircle className="h-3 w-3" />
+          Come funziona
+        </Link>
+        <p className="text-sm text-muted-foreground/50">
+          powered by{" "}
+          <a
+            href="https://dglen.it"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-bold text-foreground/40 hover:text-[#004489] transition-colors"
+          >
+            dglen srl
+          </a>
+        </p>
       </footer>
     </main>
   );

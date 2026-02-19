@@ -65,8 +65,13 @@ export function executeMetadataFilter(analysis: QueryAnalysis): {
     };
   });
 
+  // Limit Path C interpelli to top 5 by score to avoid flooding fusion with noise
+  const sortedIpResults = ipResults
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5);
+
   return {
     tuResults: Array.from(matchingArticles.values()),
-    ipResults,
+    ipResults: sortedIpResults,
   };
 }

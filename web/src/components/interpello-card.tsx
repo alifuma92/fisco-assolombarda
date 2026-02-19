@@ -10,16 +10,18 @@ import {
   CalendarDays,
   Link2,
   Info,
+  X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Collapsible,
@@ -99,7 +101,7 @@ export function InterpelloCard({ interpello }: InterpelloCardProps) {
   const massimaIsLong = interpello.massima.length > 150;
 
   return (
-    <div className="card-hover group bg-white rounded-xl border border-border/40 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+    <div className="card-hover group glass-subtle rounded-xl border border-white/30">
       <div className="p-5 space-y-3">
         {/* Header: badge + tag + detail */}
         <div className="flex items-start justify-between gap-3">
@@ -114,16 +116,16 @@ export function InterpelloCard({ interpello }: InterpelloCardProps) {
             </span>
             <InfoTip text="Numero progressivo e anno dell'interpello. Il tag indica l'area fiscale (es. IVA, IRPEF, Detrazioni edilzie)." />
           </div>
-          <InterpelloDetailDialog interpello={interpello} />
+          <InterpelloDetailDrawer interpello={interpello} />
         </div>
 
         {/* Oggetto */}
-        <h4 className="text-sm font-semibold text-foreground leading-snug">
+        <h4 className="text-[15px] font-semibold text-foreground leading-snug">
           {interpello.oggetto}
         </h4>
 
         {/* Date */}
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
           <CalendarDays className="h-3.5 w-3.5 text-[#EB8D38]" />
           <span>{formatDate(interpello.data)}</span>
           {!interpello.ha_testo_completo && (
@@ -138,7 +140,7 @@ export function InterpelloCard({ interpello }: InterpelloCardProps) {
         <Collapsible open={massimaOpen} onOpenChange={setMassimaOpen}>
           <div className="flex items-start gap-1.5">
             <p
-              className={`text-xs text-muted-foreground leading-relaxed flex-1 ${!massimaOpen && massimaIsLong ? "line-clamp-2" : ""}`}
+              className={`text-[13px] text-muted-foreground leading-relaxed flex-1 ${!massimaOpen && massimaIsLong ? "line-clamp-2" : ""}`}
             >
               {interpello.massima}
             </p>
@@ -185,7 +187,7 @@ export function InterpelloCard({ interpello }: InterpelloCardProps) {
         {/* Footer: Articoli collegati + PDF */}
         <div className="flex items-center justify-between gap-2 pt-1">
           {interpello.articoli_tu_iva_collegati.length > 0 && (
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60">
+            <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground/60">
               <Link2 className="h-3 w-3 shrink-0" />
               <span>
                 {interpello.articoli_tu_iva_collegati
@@ -224,7 +226,7 @@ function formatMassima(text: string): React.ReactNode[] {
 
   if (paragraphs.length <= 1) {
     return [
-      <p key={0} className="text-[13.5px] leading-[1.9] text-foreground/90">
+      <p key={0} className="text-[15px] leading-[1.9] text-foreground/90">
         {text}
       </p>,
     ];
@@ -233,49 +235,61 @@ function formatMassima(text: string): React.ReactNode[] {
   return paragraphs.map((paragraph, i) => (
     <p
       key={i}
-      className="text-[13.5px] leading-[1.9] text-foreground/90"
+      className="text-[15px] leading-[1.9] text-foreground/90"
     >
       {paragraph.trim()}
     </p>
   ));
 }
 
-function InterpelloDetailDialog({
+function InterpelloDetailDrawer({
   interpello,
 }: {
   interpello: SourceInterpello;
 }) {
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <button className="text-xs font-medium text-[#ED7203] bg-[#fef3e6]/50 hover:bg-[#fef3e6] px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 shrink-0">
+    <Drawer direction="right">
+      <DrawerTrigger asChild>
+        <button className="text-[13px] font-medium text-[#ED7203] bg-[#fef3e6]/50 hover:bg-[#fef3e6] px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 shrink-0">
           Dettaglio
           <ChevronRight className="h-3 w-3" />
         </button>
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[85vh] p-0 rounded-2xl overflow-hidden flex flex-col">
-        <DialogHeader className="px-6 pt-6 pb-5 bg-gradient-to-b from-[#fef3e6]/50 to-transparent border-b border-border/20">
-          <div className="flex items-center gap-2.5 mb-2.5 flex-wrap">
-            <span className="inline-flex items-center text-xs font-bold font-mono text-[#ED7203] bg-[#fef3e6] px-3 py-1.5 rounded-lg">
-              Interpello n. {interpello.numero}/{interpello.anno}
-            </span>
-            <span
-              className={`text-xs font-semibold px-2.5 py-1 rounded-full ${getTagColor(interpello.tag)}`}
-            >
-              {interpello.tag}
-            </span>
-            <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-              <CalendarDays className="h-3.5 w-3.5" />
-              {formatDate(interpello.data)}
-            </span>
+      </DrawerTrigger>
+      <DrawerContent className="h-full rounded-none">
+        {/* Fixed header */}
+        <DrawerHeader className="px-6 pt-6 pb-5 bg-gradient-to-b from-[#fef3e6]/50 to-transparent border-b border-border/20 shrink-0">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2.5 mb-2.5 flex-wrap">
+                <span className="inline-flex items-center text-sm font-bold font-mono text-[#ED7203] bg-[#fef3e6] px-3 py-1.5 rounded-lg">
+                  Interpello n. {interpello.numero}/{interpello.anno}
+                </span>
+                <span
+                  className={`text-xs font-semibold px-2.5 py-1 rounded-full ${getTagColor(interpello.tag)}`}
+                >
+                  {interpello.tag}
+                </span>
+                <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+                  <CalendarDays className="h-3.5 w-3.5" />
+                  {formatDate(interpello.data)}
+                </span>
+                <InfoTip text="Numero progressivo e anno dell'interpello. Il tag indica l'area fiscale (es. IVA, IRPEF, Detrazioni edilizie)." />
+              </div>
+              <DrawerTitle className="text-[22px] font-bold leading-tight">
+                {interpello.oggetto}
+              </DrawerTitle>
+            </div>
+            <DrawerClose asChild>
+              <button className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors shrink-0">
+                <X className="h-4 w-4" />
+              </button>
+            </DrawerClose>
           </div>
-          <DialogTitle className="text-xl font-bold leading-tight">
-            {interpello.oggetto}
-          </DialogTitle>
-        </DialogHeader>
+        </DrawerHeader>
 
-        <ScrollArea className="flex-1 px-6" style={{ maxHeight: "55vh" }}>
-          <div className="py-5 space-y-6">
+        {/* Scrollable body */}
+        <ScrollArea className="flex-1 min-h-0">
+          <div className="px-6 py-5 space-y-6">
             {/* Massima */}
             <div>
               <div className="flex items-center gap-2 mb-3">
@@ -283,6 +297,7 @@ function InterpelloDetailDialog({
                 <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
                   Massima
                 </h4>
+                <InfoTip text="La massima è il principio giuridico estratto dalla risposta dell'AdE, ovvero la sintesi del parere ufficiale." />
               </div>
               <div className="bg-gradient-to-br from-[#fef3e6]/60 to-[#fef3e6]/20 border border-[#ED7203]/10 rounded-xl p-6 space-y-3">
                 {formatMassima(interpello.massima)}
@@ -292,9 +307,12 @@ function InterpelloDetailDialog({
             {/* Temi */}
             {interpello.temi.length > 0 && (
               <div>
-                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2.5">
-                  Temi
-                </h4>
+                <div className="flex items-center gap-2 mb-2.5">
+                  <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                    Temi
+                  </h4>
+                  <InfoTip text="Aree tematiche trattate dall'interpello, utili per collegarlo ad articoli TU IVA e altri interpelli." />
+                </div>
                 <div className="flex flex-wrap gap-1.5">
                   {interpello.temi.map((tema) => (
                     <span
@@ -311,9 +329,12 @@ function InterpelloDetailDialog({
             {/* Articoli TU IVA collegati */}
             {interpello.articoli_tu_iva_collegati.length > 0 && (
               <div>
-                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2.5">
-                  Articoli TU IVA collegati
-                </h4>
+                <div className="flex items-center gap-2 mb-2.5">
+                  <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                    Articoli TU IVA collegati
+                  </h4>
+                  <InfoTip text="Articoli del Testo Unico IVA direttamente collegati a questo interpello." />
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {interpello.articoli_tu_iva_collegati.map((id) => (
                     <Badge
@@ -329,27 +350,36 @@ function InterpelloDetailDialog({
             )}
 
             {/* Citazione */}
-            <p className="text-xs text-muted-foreground/60 italic leading-relaxed">
-              {interpello.citazione}
-            </p>
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                  Citazione
+                </h4>
+                <InfoTip text="Riferimento bibliografico ufficiale per citare questo interpello in documenti e pareri." />
+              </div>
+              <p className="text-sm text-muted-foreground/60 italic leading-relaxed">
+                {interpello.citazione}
+              </p>
+            </div>
           </div>
         </ScrollArea>
 
+        {/* Fixed footer with PDF link */}
         {interpello.link_pdf && (
-          <DialogFooter className="px-6 py-4 border-t border-border/30 bg-muted/30 sm:justify-start">
+          <DrawerFooter className="px-6 py-4 border-t border-border/30 bg-muted/20 shrink-0">
             <a
               href={interpello.link_pdf}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2.5 bg-[#004489] hover:bg-[#003366] text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm"
+              className="inline-flex items-center gap-2.5 bg-[#004489] hover:bg-[#003366] text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors shadow-sm w-fit"
             >
               <FileText className="h-4 w-4" />
               Apri PDF originale
               <ExternalLink className="h-3.5 w-3.5 opacity-70" />
             </a>
-          </DialogFooter>
+          </DrawerFooter>
         )}
-      </DialogContent>
-    </Dialog>
+      </DrawerContent>
+    </Drawer>
   );
 }

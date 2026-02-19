@@ -8,7 +8,10 @@ CONTESTO: Stai lavorando con due database:
 
 ISTRUZIONI FONDAMENTALI:
 - Produci ESCLUSIVAMENTE un oggetto JSON valido (senza markdown, senza backtick, senza spiegazioni)
-- tipo_query: "normativa" se cita articoli/interpelli specifici, "specifica" se fa una domanda precisa, "generica" se la domanda è ampia
+- tipo_query:
+  - "normativa": se cita articoli/interpelli specifici (art. X, interpello Y/Z, DPR 633)
+  - "specifica": se la domanda riguarda un regime, istituto o scenario IVA CIRCOSCRITTO (es. "reverse charge servizi edili", "detrazione auto aziendali", "split payment PA", "vendite a distanza intra-UE", "depositi fiscali", "gruppo IVA requisiti", "stabile organizzazione"). Anche se usa "come funziona", è specifica se il tema è delimitato a un singolo istituto/regime
+  - "generica": se chiede una panoramica AMPIA su un'intera AREA del diritto IVA che copre molteplici istituti (es. "quali sono i regimi speciali?" copre 10+ regimi diversi; "panoramica rimborsi IVA"; "operazioni intracomunitarie" in generale; "obblighi contabili IVA")
 
 ESTRAZIONE RIFERIMENTI NORMATIVI (CRITICO — non omettere mai):
 - VECCHIO CODICE: Se l'utente menziona DPR 633, D.P.R. 633/72, 633/1972, o varianti, DEVI estrarre il riferimento.
@@ -26,6 +29,13 @@ QUERY RIFORMULATA:
 
 TEMI DISPONIBILI (seleziona solo da questa lista):
 ${TEMI.join(", ")}
+
+GUIDA ALLA SELEZIONE DEI TEMI:
+- Seleziona TUTTI i temi rilevanti, non solo il più ovvio. Più temi corretti = ricerca migliore.
+- Se la domanda riguarda immobili/fabbricati/edilizia, INCLUDI SEMPRE "iva_edilizia" E "esenzioni" (le cessioni immobiliari hanno un regime di esenzione specifico).
+- Se la domanda riguarda cessioni/vendite di beni, INCLUDI "cessioni_beni".
+- Se la domanda riguarda esenzioni/operazioni esenti, INCLUDI "esenzioni".
+- Se la domanda riguarda rivalsa/addebito IVA, INCLUDI "rivalsa".
 
 TAG INTERPELLI DISPONIBILI (per filtri_suggeriti.tag):
 ${INTERPELLO_TAGS.join(", ")}
@@ -48,9 +58,25 @@ Input: "Un'azienda italiana vende software a un cliente tedesco"
 Output:
 {"tipo_query":"specifica","temi_probabili":["commercio_elettronico","territorialita","prestazioni_servizi","cessioni_beni"],"riferimenti_normativi":{"vecchio_codice":[],"tu_iva":[],"interpelli":[]},"query_riformulata":"trattamento IVA per vendita di software e servizi digitali da impresa italiana a soggetto passivo in Germania UE, territorialità delle prestazioni di servizi B2B intracomunitarie","filtri_suggeriti":{"tag":["IVA"]}}
 
+Input: "Come funziona il rimborso IVA per soggetti non residenti UE?"
+Output:
+{"tipo_query":"specifica","temi_probabili":["rimborsi","territorialita"],"riferimenti_normativi":{"vecchio_codice":[],"tu_iva":[],"interpelli":[]},"query_riformulata":"rimborso IVA per soggetti passivi non residenti stabiliti in altro Stato membro UE, procedura di rimborso direttiva 2008/9/CE, portale elettronico","filtri_suggeriti":{"tag":["IVA"]}}
+
 Input: "Quali sono le aliquote IVA ridotte per alimenti e bevande?"
 Output:
-{"tipo_query":"generica","temi_probabili":["aliquote","iva_agevolata","cessioni_beni"],"riferimenti_normativi":{"vecchio_codice":[],"tu_iva":[],"interpelli":[]},"query_riformulata":"aliquote IVA ridotte agevolate per cessione di alimenti bevande prodotti alimentari, aliquota 4% 5% 10% tabelle allegate","filtri_suggeriti":{"tag":["ALIQ. IVA"]}}
+{"tipo_query":"specifica","temi_probabili":["aliquote","iva_agevolata","cessioni_beni"],"riferimenti_normativi":{"vecchio_codice":[],"tu_iva":[],"interpelli":[]},"query_riformulata":"aliquote IVA ridotte agevolate per cessione di alimenti bevande prodotti alimentari, aliquota 4% 5% 10% tabelle allegate","filtri_suggeriti":{"tag":["ALIQ. IVA"]}}
+
+Input: "Quale regime IVA si applica alle cessioni di fabbricati abitativi?"
+Output:
+{"tipo_query":"specifica","temi_probabili":["iva_edilizia","cessioni_beni","esenzioni"],"riferimenti_normativi":{"vecchio_codice":[],"tu_iva":[],"interpelli":[]},"query_riformulata":"regime IVA applicabile alle cessioni di fabbricati a destinazione abitativa, esenzione IVA cessioni immobiliari, opzione per l'imposizione, reverse charge cessioni fabbricati","filtri_suggeriti":{"tag":["IVA","INDIRETTE"]}}
+
+Input: "Come funzionano i regimi speciali IVA?"
+Output:
+{"tipo_query":"generica","temi_probabili":["regime_speciale"],"riferimenti_normativi":{"vecchio_codice":[],"tu_iva":[],"interpelli":[]},"query_riformulata":"panoramica dei regimi speciali IVA: regime forfettario, agricoltura, editoria, agenzie di viaggio, beni usati, oro, rottami","filtri_suggeriti":{"tag":["IVA"]}}
+
+Input: "Come funzionano le operazioni intracomunitarie ai fini IVA?"
+Output:
+{"tipo_query":"generica","temi_probabili":["operazioni_intra","territorialita","cessioni_beni"],"riferimenti_normativi":{"vecchio_codice":[],"tu_iva":[],"interpelli":[]},"query_riformulata":"panoramica operazioni intracomunitarie IVA: cessioni e acquisti intra-UE, prestazioni servizi B2B e B2C, momento impositivo, registrazione VIES","filtri_suggeriti":{"tag":["IVA"]}}
 
 FORMATO OUTPUT (JSON puro, nessun testo prima o dopo):
 {

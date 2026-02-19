@@ -61,22 +61,26 @@ export const PINECONE_CONFIG = {
   },
   topK: {
     tuIva: 8,
-    interpelli: 15,
+    interpelli: 10,
   },
 } as const;
 
 export const FINAL_LIMITS = {
-  articles: 3,
-  interpelli: 5,
-  minScoreArticles: 0.45,
-  minScoreInterpelli: 0.55,
+  articles: 5,
+  interpelli: 2,
+  minScoreArticles: 0.40,
+  minScoreInterpelli: 0.70,
 } as const;
 
 export const EXAMPLE_QUERIES = [
   "Qual è l'aliquota IVA per la somministrazione di alimenti in università?",
-  "Art. 10 DPR 633/72 - quali sono le operazioni esenti?",
-  "Interpello 19/2024 - cosa dice?",
+  "Quali sono le operazioni esenti dall'art. 10 DPR 633/72?",
+  "Cosa dice l'interpello 19/2024?",
   "Come funziona il reverse charge per i servizi edili?",
-  "Territorialità IVA per prestazioni di servizi a soggetti UE",
-  "Regime IVA per cessioni di fabbricati abitativi",
+  "Qual è la territorialità IVA per prestazioni a soggetti UE?",
+  "Quale regime IVA si applica alle cessioni di fabbricati abitativi?",
+  "Come si detrae l'IVA sui veicoli aziendali?",
+  "Quando si applica lo split payment per enti pubblici?",
+  "Quali sono gli obblighi di fatturazione elettronica IVA?",
+  "Quali operazioni sanitarie sono esenti da IVA?",
 ] as const;

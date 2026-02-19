@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "eval": "npx tsx eval/runner.ts --all",
+    "eval:fast": "npx tsx eval/runner.ts --all --skip-llm-judge",
+    "eval:normativa": "npx tsx eval/runner.ts --category normativa --skip-llm-judge",
+    "eval:specifica": "npx tsx eval/runner.ts --category specifica --skip-llm-judge",
+    "eval:generica": "npx tsx eval/runner.ts --category generica --skip-llm-judge",
+    "eval:edge": "npx tsx eval/runner.ts --category edge_case --skip-llm-judge"
   },
   "dependencies": {
     "@pinecone-database/pinecone": "^7.0.0",
@@ -21,7 +27,8 @@
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.4.1",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "vaul": "^1.1.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

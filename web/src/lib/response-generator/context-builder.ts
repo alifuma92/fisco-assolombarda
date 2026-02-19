@@ -1,7 +1,7 @@
 import type { FusedResults, TUArticle, Interpello } from "../types";
 
 const MAX_ARTICLE_CHARS = 4000;
-const MAX_INTERPELLO_CHARS = 3000;
+const MAX_INTERPELLO_CHARS = 1500;
 
 export function buildContext(results: FusedResults): string {
   const sections: string[] = [];

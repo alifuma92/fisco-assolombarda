@@ -8,6 +8,7 @@ export function useQuery() {
   const [streamingText, setStreamingText] = useState("");
   const [metadata, setMetadata] = useState<SourceMetadata | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [streamingDone, setStreamingDone] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
   const submit = useCallback(async (query: string) => {
@@ -21,6 +22,7 @@ export function useQuery() {
     setStreamingText("");
     setMetadata(null);
     setError(null);
+    setStreamingDone(false);
 
     try {
       const response = await fetch("/api/query", {
@@ -78,6 +80,8 @@ export function useQuery() {
           }
         }
       }
+
+      setStreamingDone(true);
     } catch (err) {
       if ((err as Error).name === "AbortError") return;
       setError(
@@ -92,7 +96,8 @@ export function useQuery() {
     setStreamingText("");
     setMetadata(null);
     setError(null);
+    setStreamingDone(false);
   }, []);
 
-  return { submit, isLoading, streamingText, metadata, error, reset };
+  return { submit, isLoading, streamingText, metadata, error, reset, streamingDone };
 }

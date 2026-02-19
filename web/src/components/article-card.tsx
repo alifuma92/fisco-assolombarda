@@ -9,15 +9,18 @@ import {
   Link2,
   Layers,
   Info,
+  X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Collapsible,
@@ -40,7 +43,6 @@ interface TextBlock {
 }
 
 function parseTestoIntegrale(text: string): TextBlock[] {
-  // Remove trailing structural noise (TITOLO / Capo sections after the article body)
   const cleaned = text
     .replace(/\nTITOLO\s+[IVXLCDM]+[\s\S]*$/m, "")
     .trim();
@@ -52,10 +54,8 @@ function parseTestoIntegrale(text: string): TextBlock[] {
   let currentLines: string[] = [];
 
   for (const line of lines) {
-    // Match comma start: digits + period NOT followed by another digit (avoids "10.000")
     const commaMatch = line.match(/^(\d+)\.(?!\d)\s*(.*)/);
     if (commaMatch && parseInt(commaMatch[1]) <= 50) {
-      // Save previous block
       if (currentLines.length > 0) {
         const content = currentLines.join("\n").trim();
         if (content) {
@@ -74,7 +74,6 @@ function parseTestoIntegrale(text: string): TextBlock[] {
     }
   }
 
-  // Last block
   if (currentLines.length > 0) {
     const content = currentLines.join("\n").trim();
     if (content) {
@@ -99,7 +98,7 @@ function FormattedArticleText({ text }: { text: string }) {
           return (
             <div
               key={i}
-              className="text-xs text-muted-foreground italic bg-muted/30 rounded-lg px-4 py-3 leading-relaxed"
+              className="text-sm text-muted-foreground italic bg-muted/30 rounded-lg px-4 py-3 leading-relaxed"
             >
               {block.content}
             </div>
@@ -111,7 +110,7 @@ function FormattedArticleText({ text }: { text: string }) {
             <span className="text-xs font-mono font-bold text-[#004489] bg-[#e8f1fa] rounded-lg px-2.5 py-1.5 shrink-0 mt-0.5">
               c.{block.number}
             </span>
-            <p className="text-[13px] leading-[1.8] text-foreground/90 flex-1">
+            <p className="text-[15px] leading-[1.8] text-foreground/90 flex-1">
               {block.content.replace(/\n/g, " ")}
             </p>
           </div>
@@ -151,7 +150,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
   const [commiOpen, setCommiOpen] = useState(false);
 
   return (
-    <div className="card-hover group bg-white rounded-xl border border-border/40 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+    <div className="card-hover group glass-subtle rounded-xl border border-white/30">
       <div className="p-5 space-y-3">
         {/* Header: badge + detail trigger */}
         <div className="flex items-start justify-between gap-3">
@@ -161,16 +160,16 @@ export function ArticleCard({ article }: ArticleCardProps) {
             </span>
             <InfoTip text="Numero dell'articolo nel Testo Unico IVA (D.Lgs. 19 gennaio 2026, n. 10), la nuova codificazione della disciplina IVA italiana." />
           </div>
-          <ArticleDetailDialog article={article} />
+          <ArticleDetailDrawer article={article} />
         </div>
 
         {/* Titolo */}
-        <h4 className="text-sm font-semibold text-foreground leading-snug">
+        <h4 className="text-[15px] font-semibold text-foreground leading-snug">
           {article.titolo}
         </h4>
 
         {/* Struttura */}
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
           <Layers className="h-3.5 w-3.5 shrink-0 text-[#4B92DB]" />
           <span>
             Titolo {article.struttura.titolo.numero} &rsaquo; Capo{" "}
@@ -182,7 +181,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
         {/* Vecchio codice */}
         {article.vecchio_codice && article.vecchio_codice.length > 0 && (
           <div className="flex items-center gap-1.5">
-            <p className="text-xs text-muted-foreground/70 italic">
+            <p className="text-[13px] text-muted-foreground/70 italic">
               ex {article.vecchio_codice.join(", ")}
             </p>
             <InfoTip text="Corrispondenza con gli articoli del precedente DPR 633/1972, ora sostituito dal Testo Unico IVA." />
@@ -214,7 +213,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
           <Collapsible open={commiOpen} onOpenChange={setCommiOpen}>
             <div className="flex items-center gap-1.5">
               <CollapsibleTrigger asChild>
-                <button className="flex items-center gap-1.5 text-xs font-medium text-[#4B92DB] hover:text-[#004489] transition-colors">
+                <button className="flex items-center gap-1.5 text-[13px] font-medium text-[#4B92DB] hover:text-[#004489] transition-colors">
                   <BookOpen className="h-3.5 w-3.5" />
                   {article.numero_commi} comm
                   {article.numero_commi === 1 ? "a" : "i"}
@@ -230,7 +229,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
             <CollapsibleContent>
               <div className="mt-2.5 space-y-2 ml-1 pl-3.5 border-l-2 border-[#e8f1fa]">
                 {article.commi.slice(0, 3).map((comma) => (
-                  <div key={comma.numero} className="text-xs leading-relaxed">
+                  <div key={comma.numero} className="text-[13px] leading-relaxed">
                     <span className="font-mono font-semibold text-[#004489]/60">
                       c.{comma.numero}
                     </span>
@@ -240,7 +239,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
                   </div>
                 ))}
                 {article.commi.length > 3 && (
-                  <p className="text-xs text-muted-foreground/60 italic">
+                  <p className="text-[13px] text-muted-foreground/60 italic">
                     altri {article.commi.length - 3} commi nel dettaglio
                   </p>
                 )}
@@ -251,7 +250,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
 
         {/* Riferimenti interni */}
         {article.riferimenti_interni.length > 0 && (
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60">
+          <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground/60">
             <Link2 className="h-3 w-3 shrink-0" />
             <span>
               Vedi anche artt.{" "}
@@ -267,109 +266,125 @@ export function ArticleCard({ article }: ArticleCardProps) {
   );
 }
 
-function ArticleDetailDialog({ article }: { article: SourceArticle }) {
+function ArticleDetailDrawer({ article }: { article: SourceArticle }) {
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <button className="text-xs font-medium text-[#004489] bg-[#e8f1fa]/50 hover:bg-[#e8f1fa] px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 shrink-0">
+    <Drawer direction="right">
+      <DrawerTrigger asChild>
+        <button className="text-[13px] font-medium text-[#004489] bg-[#e8f1fa]/50 hover:bg-[#e8f1fa] px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 shrink-0">
           Dettaglio
           <ChevronRight className="h-3 w-3" />
         </button>
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[85vh] p-0 rounded-2xl overflow-hidden">
-        <DialogHeader className="px-6 pt-6 pb-5 bg-gradient-to-b from-[#e8f1fa]/40 to-transparent border-b border-border/20">
-          <div className="flex items-center gap-2.5 mb-2.5 flex-wrap">
-            <span className="inline-flex items-center text-xs font-bold font-mono text-[#004489] bg-[#e8f1fa] px-3 py-1.5 rounded-lg">
-              Art. {article.articolo} TU IVA
-            </span>
-            {article.vecchio_codice && article.vecchio_codice.length > 0 && (
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs text-muted-foreground italic">
-                  ex {article.vecchio_codice.join(", ")}
+      </DrawerTrigger>
+      <DrawerContent className="h-full rounded-none">
+        {/* Fixed header */}
+        <DrawerHeader className="px-6 pt-6 pb-5 bg-gradient-to-b from-[#e8f1fa]/40 to-transparent border-b border-border/20 shrink-0">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2.5 mb-2.5 flex-wrap">
+                <span className="inline-flex items-center text-sm font-bold font-mono text-[#004489] bg-[#e8f1fa] px-3 py-1.5 rounded-lg">
+                  Art. {article.articolo} TU IVA
                 </span>
-                <InfoTip text="Corrispondenza con gli articoli del precedente DPR 633/1972." />
+                {article.vecchio_codice && article.vecchio_codice.length > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm text-muted-foreground italic">
+                      ex {article.vecchio_codice.join(", ")}
+                    </span>
+                    <InfoTip text="Corrispondenza con gli articoli del precedente DPR 633/1972." />
+                  </div>
+                )}
+              </div>
+              <DrawerTitle className="text-[22px] font-bold leading-tight">
+                {article.titolo}
+              </DrawerTitle>
+              <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-2">
+                <Layers className="h-3.5 w-3.5 text-[#4B92DB]" />
+                Titolo {article.struttura.titolo.numero} (
+                {article.struttura.titolo.nome}) &rsaquo; Capo{" "}
+                {article.struttura.capo.numero} ({article.struttura.capo.nome})
+                <InfoTip text="Collocazione sistematica dell'articolo nella struttura del Testo Unico IVA." />
+              </div>
+            </div>
+            <DrawerClose asChild>
+              <button className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors shrink-0">
+                <X className="h-4 w-4" />
+              </button>
+            </DrawerClose>
+          </div>
+        </DrawerHeader>
+
+        {/* Scrollable body */}
+        <ScrollArea className="flex-1 min-h-0">
+          <div className="px-6 py-5">
+            {/* Temi */}
+            {article.temi.length > 0 && (
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-2.5">
+                  <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                    Temi
+                  </h4>
+                  <InfoTip text="Aree tematiche principali trattate dall'articolo." />
+                </div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {article.temi.map((tema) => (
+                    <span
+                      key={tema}
+                      className="text-xs font-medium text-[#004489]/70 bg-[#e8f1fa]/70 px-2.5 py-1 rounded-full"
+                    >
+                      {tema.replace(/_/g, " ")}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Testo integrale */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                  Testo integrale
+                </h4>
+                <InfoTip text="Testo ufficiale completo dell'articolo come pubblicato in Gazzetta Ufficiale (D.Lgs. 19 gennaio 2026, n. 10)." />
+                {article.numero_commi > 0 && (
+                  <span className="text-xs text-muted-foreground/50 ml-auto">
+                    {article.numero_commi} commi
+                  </span>
+                )}
+              </div>
+              <FormattedArticleText text={article.testo_integrale} />
+            </div>
+
+            {/* Riferimenti interni */}
+            {article.riferimenti_interni.length > 0 && (
+              <div className="mt-8 pt-5 border-t border-border/30">
+                <div className="flex items-center gap-2 mb-3">
+                  <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                    Riferimenti interni
+                  </h4>
+                  <InfoTip text="Altri articoli del Testo Unico IVA citati nel testo di questo articolo. Utili per approfondire i collegamenti normativi." />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {article.riferimenti_interni.map((ref) => (
+                    <Badge
+                      key={ref}
+                      variant="secondary"
+                      className="font-mono text-xs bg-[#e8f1fa] text-[#004489] hover:bg-[#d0e3f5] px-2.5 py-1"
+                    >
+                      Art. {ref}
+                    </Badge>
+                  ))}
+                </div>
               </div>
             )}
           </div>
-          <DialogTitle className="text-xl font-bold leading-tight">
-            {article.titolo}
-          </DialogTitle>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-2">
-            <Layers className="h-3.5 w-3.5 text-[#4B92DB]" />
-            Titolo {article.struttura.titolo.numero} (
-            {article.struttura.titolo.nome}) &rsaquo; Capo{" "}
-            {article.struttura.capo.numero} ({article.struttura.capo.nome})
-            <InfoTip text="Collocazione sistematica dell'articolo nella struttura del Testo Unico IVA." />
-          </div>
-          {article.temi.length > 0 && (
-            <div className="flex items-center gap-1.5 flex-wrap mt-3">
-              {article.temi.map((tema) => (
-                <span
-                  key={tema}
-                  className="text-xs font-medium text-[#004489]/70 bg-[#e8f1fa]/70 px-2.5 py-1 rounded-full"
-                >
-                  {tema.replace(/_/g, " ")}
-                </span>
-              ))}
-              <InfoTip text="Aree tematiche principali trattate dall'articolo." />
-            </div>
-          )}
-        </DialogHeader>
-
-        <ScrollArea className="px-6 pb-6 mt-5" style={{ maxHeight: "58vh" }}>
-          {/* Testo integrale */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                Testo integrale
-              </h4>
-              <InfoTip text="Testo ufficiale completo dell'articolo come pubblicato in Gazzetta Ufficiale (D.Lgs. 19 gennaio 2026, n. 10)." />
-              {article.numero_commi > 0 && (
-                <span className="text-xs text-muted-foreground/50 ml-auto">
-                  {article.numero_commi} commi
-                </span>
-              )}
-            </div>
-            <FormattedArticleText text={article.testo_integrale} />
-          </div>
-
-          {/* Riferimenti interni */}
-          {article.riferimenti_interni.length > 0 && (
-            <div className="mt-8 pt-5 border-t border-border/30">
-              <div className="flex items-center gap-2 mb-3">
-                <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                  Riferimenti interni
-                </h4>
-                <InfoTip text="Altri articoli del Testo Unico IVA citati nel testo di questo articolo. Utili per approfondire i collegamenti normativi." />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {article.riferimenti_interni.map((ref) => (
-                  <Badge
-                    key={ref}
-                    variant="secondary"
-                    className="font-mono text-xs bg-[#e8f1fa] text-[#004489] hover:bg-[#d0e3f5] px-2.5 py-1"
-                  >
-                    Art. {ref}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Citazione */}
-          <div className="mt-8 pt-5 border-t border-border/30">
-            <div className="flex items-center gap-2 mb-2">
-              <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                Citazione
-              </h4>
-              <InfoTip text="Riferimento bibliografico ufficiale per citare questo articolo in documenti e pareri." />
-            </div>
-            <p className="text-xs text-muted-foreground/70 italic leading-relaxed">
-              {article.citazione}
-            </p>
-          </div>
         </ScrollArea>
-      </DialogContent>
-    </Dialog>
+
+        {/* Fixed footer */}
+        <DrawerFooter className="px-6 py-4 border-t border-border/30 bg-muted/20 shrink-0">
+          <p className="text-sm text-muted-foreground/70 italic leading-relaxed">
+            {article.citazione}
+          </p>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   );
 }
