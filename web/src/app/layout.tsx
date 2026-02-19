@@ -19,6 +19,11 @@ export const metadata: Metadata = {
   title: "RAG Fiscale — Testo Unico IVA e Interpelli",
   description:
     "Sistema di ricerca intelligente per normativa IVA e interpelli dell'Agenzia delle Entrate",
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: { index: false, follow: false },
+  },
 };
 
 export default function RootLayout({
