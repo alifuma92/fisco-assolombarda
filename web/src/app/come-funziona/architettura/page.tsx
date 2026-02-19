@@ -27,6 +27,11 @@ import {
   AlertTriangle,
   CircleDot,
   Info,
+  Lightbulb,
+  BookMarked,
+  RefreshCw,
+  Globe,
+  Target,
 } from "lucide-react";
 import { ScoreTooltip } from "@/components/score-tooltip";
 
@@ -1555,6 +1560,275 @@ export default function ArchitetturaPage() {
           </div>
         </section>
 
+        {/* ══════════════════════════════════════════════ */}
+        {/* EVOLUZIONI FUTURE                              */}
+        {/* ══════════════════════════════════════════════ */}
+        <section className="mb-12">
+          <SectionHeader
+            step="+"
+            icon={<Lightbulb className="h-5 w-5" />}
+            title="Evoluzioni Future"
+            subtitle="Dove il sistema può ancora migliorare"
+          />
+
+          <div className="glass-subtle rounded-xl border border-white/30 p-6 space-y-6">
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Il sistema attuale è un{" "}
+              <strong className="text-foreground">MVP solido</strong> — produce
+              risposte accurate con citazioni verificabili nel 97.5% dei test
+              effettuati. Ma i test hanno anche evidenziato alcuni scenari dove
+              la qualità può migliorare. Ecco le aree di evoluzione, ordinate
+              per impatto.
+            </p>
+
+            {/* ── 1. Vocabolario concetto → articolo ── */}
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="h-8 w-8 rounded-lg bg-[#fef3e6] flex items-center justify-center shrink-0 mt-0.5">
+                  <BookMarked className="h-4 w-4 text-[#ED7203]" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-foreground mb-1">
+                    1. Dizionario concetti fiscali → articoli
+                  </h4>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#ED7203] bg-[#fef3e6]/60 px-2 py-0.5 rounded">
+                      Impatto alto
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 bg-gray-100/60 px-2 py-0.5 rounded">
+                      Richiede lavoro manuale
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    <strong className="text-foreground">Il problema emerso dai test:</strong>{" "}
+                    quando la domanda usa un termine fiscale preciso senza
+                    citare un articolo specifico — ad esempio{" "}
+                    <em>&quot;note di variazione in diminuzione dell&apos;IVA&quot;</em>{" "}
+                    — il sistema fatica a trovare l&apos;articolo giusto (Art. 28
+                    TU IVA). Il Path A non si attiva (nessun riferimento
+                    esplicito), e il Path B/C non sempre collegano il concetto
+                    all&apos;articolo corretto.
+                  </p>
+                  <p className="text-sm text-muted-foreground leading-relaxed mt-2">
+                    <strong className="text-foreground">La soluzione:</strong>{" "}
+                    un dizionario curato manualmente da un fiscalista che mappi i
+                    concetti chiave agli articoli. Esempi:
+                  </p>
+                  <div className="mt-2.5 space-y-1.5">
+                    <DictEntry
+                      concept="note di variazione"
+                      article="Art. 28 TU IVA"
+                    />
+                    <DictEntry
+                      concept="detrazione IVA"
+                      article="Artt. 19, 19-bis, 19-bis.1 → Artt. 79, 81, 82"
+                    />
+                    <DictEntry
+                      concept="momento impositivo / esigibilità"
+                      article="Artt. 6, 6-bis → Artt. 18, 19"
+                    />
+                    <DictEntry
+                      concept="operazioni esenti"
+                      article="Art. 10 → Art. 37"
+                    />
+                    <DictEntry
+                      concept="reverse charge"
+                      article="Art. 17 → Art. 64"
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed mt-2.5">
+                    In pratica funzionerebbe come un{" "}
+                    <strong className="text-foreground">Path A potenziato</strong>:
+                    oltre a riconoscere citazioni esplicite (&quot;Art. 10
+                    DPR 633/72&quot;), riconoscerebbe anche i concetti (&quot;note
+                    di variazione&quot;) e li tratterebbe come lookup diretti.
+                    Basterebbero <strong className="text-foreground">50-80 voci</strong>{" "}
+                    per coprire i concetti fiscali più ricorrenti.
+                  </p>
+                  <div className="mt-2.5 rounded-lg bg-[#fef3e6]/30 border border-[#ED7203]/10 p-3">
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      <strong className="text-[#ED7203]">Perché serve un fiscalista:</strong>{" "}
+                      questa mappatura non può essere automatizzata. Un modello AI
+                      potrebbe sbagliare le associazioni (es. &quot;compensazione&quot;
+                      ha un significato diverso in ambito IVA rispetto a quello
+                      tributario generale). Serve l&apos;esperienza di chi conosce la
+                      materia per creare mappature corrette e complete.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ── 2. Cache embeddings ── */}
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="h-8 w-8 rounded-lg bg-[#e8f1fa] flex items-center justify-center shrink-0 mt-0.5">
+                  <Zap className="h-4 w-4 text-[#004489]" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-foreground mb-1">
+                    2. Cache delle ricerche
+                  </h4>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#004489] bg-[#e8f1fa]/60 px-2 py-0.5 rounded">
+                      Impatto medio
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-green-700/70 bg-green-50/60 px-2 py-0.5 rounded">
+                      Automatizzabile
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Domande simili generano embedding simili e quindi gli stessi
+                    risultati di ricerca. Un sistema di cache per query
+                    semanticamente equivalenti (es.{" "}
+                    <em>&quot;reverse charge edilizia&quot;</em> ≈{" "}
+                    <em>&quot;inversione contabile settore edile&quot;</em>)
+                    eliminerebbe il costo dell&apos;embedding e la latenza di
+                    Pinecone per le domande ricorrenti. Tempo di risposta
+                    stimato: da ~15 secondi a ~5 secondi per query frequenti.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* ── 3. Ampliamento dataset ── */}
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="h-8 w-8 rounded-lg bg-[#e8f1fa] flex items-center justify-center shrink-0 mt-0.5">
+                  <Database className="h-4 w-4 text-[#004489]" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-foreground mb-1">
+                    3. Ampliamento del database
+                  </h4>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#004489] bg-[#e8f1fa]/60 px-2 py-0.5 rounded">
+                      Impatto medio
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 bg-gray-100/60 px-2 py-0.5 rounded">
+                      Richiede acquisizione dati
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Attualmente il database contiene gli interpelli del 2024-2025.
+                    L&apos;architettura è già predisposta per integrare:
+                  </p>
+                  <ul className="mt-1.5 space-y-1">
+                    <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <ChevronRight className="h-3.5 w-3.5 text-[#004489] shrink-0 mt-0.5" />
+                      <span>
+                        <strong className="text-foreground">Interpelli precedenti</strong>{" "}
+                        (2020-2023) per ampliare la copertura della prassi interpretativa
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <ChevronRight className="h-3.5 w-3.5 text-[#004489] shrink-0 mt-0.5" />
+                      <span>
+                        <strong className="text-foreground">Circolari dell&apos;Agenzia delle Entrate</strong>{" "}
+                        che forniscono interpretazioni ufficiali di portata generale
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <ChevronRight className="h-3.5 w-3.5 text-[#004489] shrink-0 mt-0.5" />
+                      <span>
+                        <strong className="text-foreground">Risoluzioni</strong>{" "}
+                        e altri documenti di prassi rilevanti per l&apos;IVA
+                      </span>
+                    </li>
+                  </ul>
+                  <p className="text-sm text-muted-foreground leading-relaxed mt-2">
+                    Il pipeline di indicizzazione è lo stesso: estrazione →
+                    classificazione temi → embedding → Pinecone. Non richiede
+                    modifiche architetturali.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* ── 4. Aggiornamento automatico ── */}
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="h-8 w-8 rounded-lg bg-[#e8f1fa] flex items-center justify-center shrink-0 mt-0.5">
+                  <RefreshCw className="h-4 w-4 text-[#004489]" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-foreground mb-1">
+                    4. Aggiornamento automatico
+                  </h4>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 bg-gray-100/60 px-2 py-0.5 rounded">
+                      Impatto futuro
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-green-700/70 bg-green-50/60 px-2 py-0.5 rounded">
+                      Automatizzabile
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Un job periodico (settimanale o mensile) che scarica i nuovi
+                    interpelli pubblicati dall&apos;Agenzia delle Entrate, li
+                    processa con lo stesso pipeline, e li aggiunge al database
+                    automaticamente. Così il sistema rimane sempre aggiornato
+                    senza intervento manuale.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* ── 5. Multi-normativa ── */}
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="h-8 w-8 rounded-lg bg-[#e8f1fa] flex items-center justify-center shrink-0 mt-0.5">
+                  <Globe className="h-4 w-4 text-[#004489]" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-foreground mb-1">
+                    5. Espansione ad altre normative
+                  </h4>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 bg-gray-100/60 px-2 py-0.5 rounded">
+                      Visione a lungo termine
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    L&apos;architettura è modulare: il sistema di analisi, ricerca
+                    multi-path e fusion non è specifico per l&apos;IVA. La stessa
+                    infrastruttura può essere replicata per altre aree normative —
+                    IRES, IRPEF, tributi locali — creando un{" "}
+                    <strong className="text-foreground">
+                      assistente fiscale completo
+                    </strong>
+                    . Ogni normativa avrebbe il suo database, le sue mappature, e
+                    il suo dizionario di concetti, ma condividerebbe l&apos;intero
+                    engine di ricerca e generazione.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* ── Riepilogo priorità ── */}
+            <div className="rounded-lg bg-[#e8f1fa]/30 border border-[#004489]/5 p-4">
+              <div className="flex items-start gap-3">
+                <Target className="h-4 w-4 text-[#004489] shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-sm font-bold text-foreground mb-1.5">
+                    Priorità consigliata
+                  </h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    L&apos;evoluzione con il <strong className="text-foreground">miglior rapporto
+                    impatto/sforzo</strong> è il dizionario concetti → articoli (punto 1).
+                    È l&apos;unico intervento che migliora direttamente la qualità
+                    delle risposte per le domande più comuni — quelle dove
+                    l&apos;utente usa un termine fiscale senza citare un articolo
+                    specifico. Richiede ~2-3 giorni di lavoro con un fiscalista
+                    per creare le 50-80 mappature iniziali, poi può essere
+                    esteso nel tempo.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ── CTA ── */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
@@ -2073,5 +2347,17 @@ function ParamRow({
       </td>
       <td className="py-2">{desc}</td>
     </tr>
+  );
+}
+
+function DictEntry({ concept, article }: { concept: string; article: string }) {
+  return (
+    <div className="flex items-center gap-2 text-xs bg-white/40 border border-white/50 rounded-lg px-3 py-2">
+      <span className="font-semibold text-foreground whitespace-nowrap">
+        &quot;{concept}&quot;
+      </span>
+      <ArrowRight className="h-3 w-3 text-[#004489]/40 shrink-0" />
+      <span className="font-mono text-[#004489]">{article}</span>
+    </div>
   );
 }
